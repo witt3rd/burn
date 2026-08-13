@@ -60,7 +60,6 @@ extension = []
 # Backend features
 autotune = ["burn-dispatch/autotune"]
 autotune-checks = ["burn-dispatch/autotune-checks"]
-fusion = ["burn-dispatch/fusion"]
 
 [dependencies]
 burn-std = { workspace = true }

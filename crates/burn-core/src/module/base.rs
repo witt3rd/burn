@@ -5,7 +5,6 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-pub use burn_derive::Module;
 use burn_tensor::{Bool, Device, Int, Tensor};
 
 /// Type alias to `Vec<Device>` which supports `no_std` environments, but automatically using
@@ -79,7 +78,6 @@ macro_rules! module {
 
 /// Trait for all neural network modules.
 ///
-/// Modules should be created using the [derive](burn_derive::Module) attribute.
 /// This will make your module trainable, savable and loadable via
 /// `state` and `load`.
 ///

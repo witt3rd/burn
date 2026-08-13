@@ -1,5 +1,4 @@
 use alloc::{format, string::String, string::ToString};
-pub use burn_derive::Config;
 use core::fmt::Debug;
 
 /// Configuration IO error.

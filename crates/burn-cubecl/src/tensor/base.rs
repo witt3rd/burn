@@ -44,6 +44,7 @@ impl<R: CubeRuntime> From<CubeTensor<R>> for TensorHandle<R> {
 }
 
 impl<R: CubeRuntime> cubecl::tune::AutotuneOutput for CubeTensor<R> {
+    fn check_equivalence(&self, _: Self) {}
     #[cfg(feature = "autotune-checks")]
     fn check_equivalence(&self, other: Self) {
         use crate::ops::into_data_sync;

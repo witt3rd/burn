@@ -21,7 +21,7 @@ use hashbrown::HashMap;
 use crate::module::{Module, ModuleMapper, ModuleVisitor, Param, ParamGroup, ParamId};
 use crate::tensor::{Bool, DType, Device, Float, Int, Shape, Tensor, TensorData, kind::Basic};
 
-use burn_pack::{Reader, Writer};
+// burn_pack stripped
 
 /// Controls how a parameter's dtype is resolved when loading a [`ModuleRecord`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -57,8 +57,8 @@ impl core::fmt::Display for RecordError {
 #[cfg(feature = "std")]
 impl std::error::Error for RecordError {}
 
-impl From<burn_pack::Error> for RecordError {
-    fn from(err: burn_pack::Error) -> Self {
+impl From<std::io::Error> for RecordError {
+    fn from(err: std::io::Error) -> Self {
         RecordError::Io(err.to_string())
     }
 }
@@ -186,20 +186,6 @@ impl ModuleRecord {
         Self::from_reader(Reader::from_file(path)?)
     }
 
-    fn pack_tensors(self) -> Vec<burn_pack::Tensor> {
-        self.tensors
-            .into_iter()
-            .map(|t| {
-                burn_pack::Tensor::new(
-                    t.path,
-                    t.data.dtype,
-                    t.data.shape,
-                    Some(t.id.val()),
-                    t.data.bytes,
-                )
-            })
-            .collect()
-    }
 
     fn from_reader(reader: Reader) -> Result<Self, RecordError> {
         let tensors = reader

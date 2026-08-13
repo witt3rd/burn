@@ -31,10 +31,6 @@ pub mod graphics {
     pub use cubecl::wgpu::{AutoGraphicsApi, Dx12, GraphicsApi, Metal, OpenGl, Vulkan, WebGpu};
 }
 
-#[cfg(feature = "fusion")]
-type WgpuInner<C> = burn_fusion::Fusion<CubeBackend<cubecl::wgpu::WgpuRuntime<C>>>;
-
-#[cfg(not(feature = "fusion"))]
 type WgpuInner<C> = CubeBackend<cubecl::wgpu::WgpuRuntime<C>>;
 
 /// Tensor backend that uses the wgpu crate for executing GPU compute shaders.

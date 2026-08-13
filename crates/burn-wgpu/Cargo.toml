@@ -15,18 +15,18 @@ version.workspace = true
 workspace = true
 
 [features]
-default = ["std", "autotune", "fusion", "burn-cubecl/default", "cubecl/default"]
+default = ["std", "autotune", "burn-cubecl/default", "cubecl/default"]
 doc = ["burn-cubecl/doc"]
 std = ["burn-cubecl/std", "cubecl/std"]
 
 tracing = [
     "cubecl/tracing",
     "burn-backend/tracing",
-    "burn-fusion?/tracing",
+    # "burn-fusion?/tracing",  # stripped
     "burn-cubecl/tracing",
 ]
 
-fusion = ["burn-fusion", "burn-cubecl/fusion"]
+# fusion = []  # stripped: burn-fusion removed
 autotune = ["burn-cubecl/autotune"]
 autotune-checks = ["burn-cubecl/autotune-checks"]
 
@@ -41,8 +41,8 @@ webgpu = ["cubecl/webgpu", "burn-backend/cubecl-webgpu"]
 [dependencies]
 cubecl = { workspace = true, features = ["wgpu"] }
 
-burn-cubecl = { workspace = true }
-burn-fusion = { workspace = true, optional = true, features = ["default"] }
+burn-cubecl = { workspace = true, features = ["default"] }
+# burn-fusion = { workspace = true, optional = true, features = ["default"] }  # stripped
 burn-backend = { workspace = true, features = [
     "cubecl-wgpu",
 ] }

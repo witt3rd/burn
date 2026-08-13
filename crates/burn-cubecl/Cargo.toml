@@ -15,48 +15,15 @@ version.workspace = true
 workspace = true
 
 [features]
-default = [
-    "autotune",
-    "std",
-    "fusion",
-    "cubecl/default",
-    "burn-backend/default",
-    "burn-fusion?/default",
-    "burn-cubecl-fusion?/default",
-]
-std = [
-    "cubecl/std",
-    "burn-backend/std",
-    "burn-fusion?/std",
-    "burn-cubecl-fusion?/std",
-]
+default = ["autotune", "std", "cubecl/default", "burn-backend/default"]
+std = ["cubecl/std", "burn-backend/std"]
 doc = ["default"]
-
-tracing = [
-    "dep:tracing",
-    "cubecl/tracing",
-    "burn-std/tracing",
-    "burn-backend/tracing",
-    "burn-fusion?/tracing",
-    "burn-cubecl-fusion?/tracing",
-]
-
-autotune = ["burn-cubecl-fusion?/autotune"]
-autotune-checks = [
-    "autotune",
-    "cubecl/autotune-checks",
-    "burn-cubecl-fusion?/autotune-checks",
-]
-
-fusion = ["burn-fusion", "burn-cubecl-fusion"]
-fusion-experimental = ["fusion"]
-
-template = []
-
+tracing = ["dep:tracing", "cubecl/tracing", "burn-std/tracing", "burn-backend/tracing"]
+autotune = ["cubecl/autotune-checks"]
+autotune-checks = ["cubecl/autotune-checks"]
+template = ["cubecl/template"]
 
 [dependencies]
-burn-cubecl-fusion = { workspace = true, optional = true }
-burn-fusion = { workspace = true, optional = true }
 burn-ir = { workspace = true }
 burn-std = { workspace = true }
 burn-backend = { workspace = true, features = [
