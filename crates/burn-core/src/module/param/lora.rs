@@ -11,7 +11,7 @@ use burn_tensor::Tensor;
 /// parameter; the adapter factors are surfaced to the optimizer, autodiff and record systems as
 /// regular parameters with their own [`ParamId`](super::ParamId)s through the module
 /// visitor/mapper traversal.
-#[derive(Debug, Module)]
+#[derive(Debug, Clone)]
 pub struct LoraAdapter {
     /// Down-projection factor with shape `[d_in, rank]` (trainable).
     pub a: Param<Tensor<2>>,
@@ -37,5 +37,51 @@ impl LoraAdapter {
     /// (optimizer-updated) factors and keeps them as autodiff leaves for backpropagation.
     pub fn delta(&self) -> Tensor<2> {
         self.a.val().matmul(self.b.val()).mul_scalar(self.scale)
+    }
+}
+
+impl Module for LoraAdapter {
+    fn collect_devices(&self, devices: crate::module::Devices) -> crate::module::Devices {
+        let devices = self.a.collect_devices(devices);
+        self.b.collect_devices(devices)
+    }
+
+    fn fork(self, device: &burn_tensor::Device) -> Self {
+        Self {
+            a: self.a.fork(device),
+            b: self.b.fork(device),
+            scale: self.scale,
+        }
+    }
+
+    fn to_device(self, device: &burn_tensor::Device) -> Self {
+        Self {
+            a: self.a.to_device(device),
+            b: self.b.to_device(device),
+            scale: self.scale,
+        }
+    }
+
+    fn visit<Visitor: crate::module::ModuleVisitor>(&self, visitor: &mut Visitor) {
+        self.a.visit(visitor);
+        self.b.visit(visitor);
+    }
+
+    fn map<M: crate::module::ModuleMapper>(self, mapper: &mut M) -> Self {
+        Self {
+            a: self.a.map(|a| a.map(mapper)),
+            b: self.b.map(|b| b.map(mapper)),
+            scale: self.scale,
+        }
+    }
+}
+
+impl crate::module::AutodiffModule for LoraAdapter {
+    fn valid(&self) -> Self {
+        self.clone()
+    }
+
+    fn from_inner(module: Self) -> Self {
+        module
     }
 }

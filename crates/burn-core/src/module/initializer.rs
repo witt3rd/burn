@@ -14,7 +14,7 @@ use burn_tensor::{Device, linalg};
 use num_traits::Float as _;
 
 /// Enum specifying with what values a tensor should be initialized
-#[derive(Config, Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Initializer {
     /// Fills tensor with specified value everywhere
     Constant {

@@ -135,29 +135,18 @@ impl ApplyResult {
             return vec![stripped];
         }
 
-        // Fall back to Jaro similarity (used by Elixir for "did you mean?" suggestions)
-        // Jaro gives higher weight to matching prefixes, ideal for hierarchical tensor paths
-        let mut similarities: Vec<(String, f64)> = self
+        // Simple prefix-based similarity (stripped textdistance dep)
+        let prefix_len = missing_path.len().min(8);
+        let prefix = &missing_path[..prefix_len];
+        let mut matches: Vec<String> = self
             .unused
             .iter()
-            .map(|available| {
-                let similarity = textdistance::nstr::jaro(missing_path, available);
-                (available.clone(), similarity)
-            })
-            .collect();
-
-        // Sort by similarity (higher = more similar)
-        similarities
-            .sort_by(|(_, a), (_, b)| b.partial_cmp(a).unwrap_or(core::cmp::Ordering::Equal));
-
-        // Only suggest paths with >= 70% similarity
-        const SIMILARITY_THRESHOLD: f64 = 0.7;
-        similarities
-            .into_iter()
-            .filter(|(_, sim)| *sim >= SIMILARITY_THRESHOLD)
+            .filter(|available| available.starts_with(prefix) || prefix.starts_with(available.as_str()))
             .take(max_suggestions)
-            .map(|(path, _)| path)
-            .collect()
+            .cloned()
+            .collect();
+        matches.sort();
+        matches
     }
 }
 

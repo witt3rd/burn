@@ -64,7 +64,7 @@ impl From<std::io::Error> for RecordError {
 }
 
 /// A single recorded tensor: its module path, parameter id, and data.
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 struct RecordTensor {
     path: String,
     id: ParamId,
@@ -163,44 +163,34 @@ impl ModuleRecord {
         self
     }
 
-    /// Serialize the record to an in-memory burnpack byte buffer.
+    /// Serialize the record to an in-memory byte buffer (JSON).
     pub fn into_bytes(self) -> Result<crate::tensor::Bytes, RecordError> {
-        Ok(Writer::new(self.pack_tensors()).into_bytes()?)
+        let json = serde_json::to_vec(&self.tensors)
+            .map_err(|e| RecordError::Io(e.to_string()))?;
+        Ok(crate::tensor::Bytes::from_elems(json))
     }
 
-    /// Reconstruct a record from an in-memory burnpack byte buffer.
+    /// Reconstruct a record from an in-memory byte buffer (JSON).
     pub fn from_bytes(bytes: crate::tensor::Bytes) -> Result<Self, RecordError> {
-        Self::from_reader(Reader::from_bytes(bytes)?)
+        let tensors: Vec<RecordTensor> = serde_json::from_slice(&bytes)
+            .map_err(|e| RecordError::Io(e.to_string()))?;
+        Ok(Self::from_tensors(tensors))
     }
 
-    /// Save the record to a burnpack file on disk.
+    /// Save the record to a JSON file on disk.
     #[cfg(feature = "std")]
     pub fn save<P: AsRef<std::path::Path>>(self, path: P) -> Result<(), RecordError> {
-        Writer::new(self.pack_tensors()).write_to_file(path)?;
-        Ok(())
+        let json = serde_json::to_vec_pretty(&self.tensors)
+            .map_err(|e| RecordError::Io(e.to_string()))?;
+        std::fs::write(path, json).map_err(|e| RecordError::Io(e.to_string()))
     }
 
-    /// Load a record from a burnpack file on disk.
+    /// Load a record from a JSON file on disk.
     #[cfg(feature = "std")]
     pub fn load<P: AsRef<std::path::Path>>(path: P) -> Result<Self, RecordError> {
-        Self::from_reader(Reader::from_file(path)?)
-    }
-
-
-    fn from_reader(reader: Reader) -> Result<Self, RecordError> {
-        let tensors = reader
-            .into_tensors()?
-            .into_iter()
-            .map(|t| {
-                let id = t.param_id.map(ParamId::from).unwrap_or_else(ParamId::new);
-                let data = TensorData::from_bytes(t.bytes, t.shape, t.dtype);
-                RecordTensor {
-                    path: t.name,
-                    id,
-                    data,
-                }
-            })
-            .collect();
+        let json = std::fs::read(path).map_err(|e| RecordError::Io(e.to_string()))?;
+        let tensors: Vec<RecordTensor> = serde_json::from_slice(&json)
+            .map_err(|e| RecordError::Io(e.to_string()))?;
         Ok(Self::from_tensors(tensors))
     }
 
