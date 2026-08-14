@@ -30,7 +30,7 @@ broken_intra_doc_links = "deny"
 invalid_html_tags = "deny"
 
 [workspace.dependencies]
-cubek = { git = "ssh://git@github.com:witt3rd/cubek.git", branch = "keel-strip", default-features = false }
+cubek = { git = "ssh://git@github.com/witt3rd/cubek.git", branch = "keel-strip", default-features = false }
 
 atomic_float = "1"
 axum = "0.8.8"
